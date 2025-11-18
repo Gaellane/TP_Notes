@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: notes
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  backend:
+    image: eclipse-temurin:17-jdk
+    container_name: rest-api_student
+    working_dir: /app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+    depends_on:
+      - mysql
+    command: ["java", "-jar", "build/libs/student-0.0.1-SNAPSHOT.jar"]
+    networks:
+      - app-network
+
+  gradle:
+    image: gradle:8.10.2-jdk17
+    container_name: gradle_student
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    command: tail -f /dev/null
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge
